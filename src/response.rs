@@ -136,14 +136,14 @@ impl Response {
     pub fn text(&self) -> PhpResult<String> {
         let bytes = self.read_body().map_err(PhpException::from)?;
         String::from_utf8(bytes.to_vec())
-            .map_err(|e| PhpException::default(format!("UTF-8 decode error: {e}")))
+            .map_err(|e| PhpException::from_message(format!("UTF-8 decode error: {e}")))
     }
 
     /// Response body decoded as JSON. Returns a PHP array or scalar.
     pub fn json(&self) -> PhpResult<ext_php_rs::types::Zval> {
         let bytes = self.read_body().map_err(PhpException::from)?;
         let val: serde_json::Value = serde_json::from_slice(&bytes)
-            .map_err(|e| PhpException::default(format!("JSON decode error: {e}")))?;
+            .map_err(|e| PhpException::from_message(format!("JSON decode error: {e}")))?;
         json_to_zval(val)
     }
 
@@ -197,18 +197,18 @@ fn json_to_zval(val: serde_json::Value) -> PhpResult<ext_php_rs::types::Zval> {
         }
         Value::String(s) => s
             .into_zval(false)
-            .map_err(|e| PhpException::default(format!("string conversion error: {e}"))),
+            .map_err(|e| PhpException::from_message(format!("string conversion error: {e}"))),
         Value::Array(arr) => {
             let mut php_arr = ext_php_rs::types::ZendHashTable::new();
             for item in arr {
                 let item_zval = json_to_zval(item)?;
                 php_arr
                     .push(item_zval)
-                    .map_err(|e| PhpException::default(format!("array push error: {e}")))?;
+                    .map_err(|e| PhpException::from_message(format!("array push error: {e}")))?;
             }
             php_arr
                 .into_zval(false)
-                .map_err(|e| PhpException::default(format!("array conversion error: {e}")))
+                .map_err(|e| PhpException::from_message(format!("array conversion error: {e}")))
         }
         Value::Object(map) => {
             let mut php_arr = ext_php_rs::types::ZendHashTable::new();
@@ -216,11 +216,11 @@ fn json_to_zval(val: serde_json::Value) -> PhpResult<ext_php_rs::types::Zval> {
                 let val_zval = json_to_zval(v)?;
                 php_arr
                     .insert(k.as_str(), val_zval)
-                    .map_err(|e| PhpException::default(format!("array insert error: {e}")))?;
+                    .map_err(|e| PhpException::from_message(format!("array insert error: {e}")))?;
             }
             php_arr
                 .into_zval(false)
-                .map_err(|e| PhpException::default(format!("array conversion error: {e}")))
+                .map_err(|e| PhpException::from_message(format!("array conversion error: {e}")))
         }
     }
 }

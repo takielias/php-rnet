@@ -19,21 +19,21 @@ impl Proxy {
     /// Route all traffic through this proxy.
     pub fn all(url: &str) -> PhpResult<Self> {
         let inner = WreqProxy::all(url)
-            .map_err(|e| PhpException::default(format!("invalid proxy URL: {e}")))?;
+            .map_err(|e| PhpException::from_message(format!("invalid proxy URL: {e}")))?;
         Ok(Self { inner })
     }
 
     /// Route only HTTP traffic through this proxy.
     pub fn http(url: &str) -> PhpResult<Self> {
         let inner = WreqProxy::http(url)
-            .map_err(|e| PhpException::default(format!("invalid proxy URL: {e}")))?;
+            .map_err(|e| PhpException::from_message(format!("invalid proxy URL: {e}")))?;
         Ok(Self { inner })
     }
 
     /// Route only HTTPS traffic through this proxy.
     pub fn https(url: &str) -> PhpResult<Self> {
         let inner = WreqProxy::https(url)
-            .map_err(|e| PhpException::default(format!("invalid proxy URL: {e}")))?;
+            .map_err(|e| PhpException::from_message(format!("invalid proxy URL: {e}")))?;
         Ok(Self { inner })
     }
 
