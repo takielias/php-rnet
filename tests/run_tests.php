@@ -358,8 +358,19 @@ function resp_info(RNet\Response $resp): string {
     return sprintf(' (status %d, body: %s)', $resp->status(), substr($body, 0, 200));
 }
 
+// httpbin.org rate-limits body-echo requests per client IP and answers 429.
+function post_echo(array $options): RNet\Response {
+    for ($attempt = 1; ; $attempt++) {
+        $resp = RNet\post('https://httpbin.org/post', $options);
+        if ($resp->status() !== 429 || $attempt > 3) {
+            return $resp;
+        }
+        sleep(1);
+    }
+}
+
 test('json option sets body and Content-Type', function () {
-    $resp = RNet\post('https://httpbin.org/post', [
+    $resp = post_echo([
         'json' => ['hello' => 'world', 'num' => 42],
     ]);
     $data = $resp->json();
@@ -368,7 +379,7 @@ test('json option sets body and Content-Type', function () {
 });
 
 test('form option sets body and Content-Type', function () {
-    $resp = RNet\post('https://httpbin.org/post', [
+    $resp = post_echo([
         'form' => ['field' => 'value', 'other' => 'data'],
     ]);
     $data = $resp->json();
@@ -377,7 +388,7 @@ test('form option sets body and Content-Type', function () {
 });
 
 test('body option sends raw string body', function () {
-    $resp = RNet\post('https://httpbin.org/post', [
+    $resp = post_echo([
         'headers' => ['Content-Type' => 'text/plain'],
         'body'    => 'raw payload here',
     ]);
