@@ -4,6 +4,13 @@ on:
   push:
     tags:
       - 'v*'
+  pull_request:
+    paths:
+      - '.github/workflows/release.yml'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'src/**'
+      - 'tests/**'
 
 jobs:
   build:
@@ -12,7 +19,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.1', '8.2', '8.3', '8.4']
+        include:
+          - php: '8.2'
+            min_patch: '8.2.35'
+          - php: '8.3'
+            min_patch: '8.3.36'
+          - php: '8.4'
+            min_patch: '8.4.27'
+          - php: '8.5'
+            min_patch: '8.5.12'
 
     steps:
       - name: Checkout
@@ -36,6 +51,23 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: ''
           tools: none
+
+      - name: Check PHP patch level
+        env:
+          PHP: /usr/bin/php${{ matrix.php }}
+          PHP_CONFIG: /usr/bin/php-config${{ matrix.php }}
+          MIN_PATCH: ${{ matrix.min_patch }}
+        run: |
+          "$PHP" -v
+          runtime=$("$PHP" -r 'echo PHP_VERSION;')
+          headers=$("$PHP_CONFIG" --version)
+          echo "runtime=$runtime headers=$headers min=$MIN_PATCH"
+          if [ "$runtime" != "$headers" ]; then
+            echo "::error::php ($runtime) and php-config ($headers) versions differ"
+            exit 1
+          fi
+          "$PHP" -r 'exit(version_compare(PHP_VERSION, getenv("MIN_PATCH"), ">=") && !str_contains(PHP_VERSION, "-dev") ? 0 : 1);' \
+            || { echo "::error::PHP $runtime is below the patched minimum $MIN_PATCH"; exit 1; }
 
       - name: Cache Cargo registry
         uses: actions/cache@v4
@@ -61,10 +93,12 @@ jobs:
         run: $PHP -d extension=target/release/librnet.so tests/run_tests.php
 
       - name: Rename artifact
+        env:
+          LABEL: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'dryrun' }}
         run: |
           PHP_VER=$(echo "${{ matrix.php }}" | tr -d '.')
           cp target/release/librnet.so \
-            "librnet-${{ github.ref_name }}-php${PHP_VER}-linux-x86_64-nts.so"
+            "librnet-${LABEL}-php${PHP_VER}-linux-x86_64-nts.so"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -76,6 +110,7 @@ jobs:
     name: Create GitHub Release
     runs-on: ubuntu-22.04
     needs: build
+    if: startsWith(github.ref, 'refs/tags/')
     permissions:
       contents: write
 
