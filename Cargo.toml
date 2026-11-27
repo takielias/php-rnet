@@ -2,7 +2,7 @@
 name = "php-rnet"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.85.0"
+rust-version = "1.95.0"
 description = "A high-performance PHP HTTP client with browser TLS/H2 fingerprinting, built in Rust"
 license = "MIT"
 
@@ -12,7 +12,7 @@ crate-type = ["cdylib"]
 path = "src/lib.rs"
 
 [dependencies]
-ext-php-rs = { version = "0.15", features = ["closure", "anyhow"] }
+ext-php-rs = { version = "0.16.5", features = ["closure", "anyhow"] }
 wreq = { version = "6.0.0-rc.28", features = [
     "cookies",
     "gzip",
@@ -55,6 +55,3 @@ lto = "fat"
 codegen-units = 1
 strip = true
 panic = "abort"
-
-[build-dependencies]
-ext-php-rs = { version = "0.15", features = ["closure", "anyhow"] }

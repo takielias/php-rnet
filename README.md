@@ -373,7 +373,7 @@ try {
 
 - Linux x86_64
 - PHP 8.2 or newer (with development headers)
-- Rust 1.85 or newer
+- Rust 1.95 or newer
 - cmake 3.14 or newer (to compile BoringSSL)
 - libclang 18 (used at build time only by bindgen — not needed at runtime)
 - A C compiler: gcc or clang
@@ -392,7 +392,7 @@ source ~/.cargo/env
 Verify:
 
 ```bash
-rustc --version   # should be 1.85 or newer
+rustc --version   # should be 1.95 or newer
 cargo --version
 ```
 

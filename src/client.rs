@@ -63,7 +63,7 @@ impl ClientBuilder {
     pub fn impersonate(&mut self, profile: &str) -> PhpResult<()> {
         self.emulation = Some(
             parse_emulation(profile)
-                .ok_or_else(|| PhpException::default(format!("unknown emulation profile: {profile}")))?,
+                .ok_or_else(|| PhpException::from_message(format!("unknown emulation profile: {profile}")))?,
         );
         Ok(())
     }
@@ -157,7 +157,7 @@ pub struct Client {
 impl Client {
     pub fn from_builder(b: &ClientBuilder) -> PhpResult<Self> {
         let rt = tokio::runtime::Runtime::new()
-            .map_err(|e| PhpException::default(format!("tokio runtime error: {e}")))?;
+            .map_err(|e| PhpException::from_message(format!("tokio runtime error: {e}")))?;
 
         let mut builder = wreq::Client::builder();
 
@@ -219,7 +219,7 @@ impl Client {
 
         let inner = builder
             .build()
-            .map_err(|e| PhpException::default(format!("client build error: {e}")))?;
+            .map_err(|e| PhpException::from_message(format!("client build error: {e}")))?;
 
         Ok(Self {
             inner,
@@ -354,7 +354,7 @@ impl Client {
     /// Send a request with any HTTP method.
     pub fn request(&self, method: &str, url: &str, options: Option<&ZendHashTable>) -> PhpResult<Response> {
         let m = wreq::Method::from_bytes(method.as_bytes())
-            .map_err(|_| PhpException::default(format!("invalid HTTP method: {method}")))?;
+            .map_err(|_| PhpException::from_message(format!("invalid HTTP method: {method}")))?;
         let req = self.build_request(m, url, options).map_err(PhpException::from)?;
         self.execute(req).map_err(PhpException::from)
     }
