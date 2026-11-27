@@ -353,13 +353,18 @@ test('query params are appended to URL', function () {
     assert_eq($data['args']['page'] ?? null, '2');
 });
 
+function resp_info(RNet\Response $resp): string {
+    $body = preg_replace('/\s+/', ' ', $resp->text());
+    return sprintf(' (status %d, body: %s)', $resp->status(), substr($body, 0, 200));
+}
+
 test('json option sets body and Content-Type', function () {
     $resp = RNet\post('https://httpbin.org/post', [
         'json' => ['hello' => 'world', 'num' => 42],
     ]);
     $data = $resp->json();
-    assert_eq($data['json']['hello'] ?? null, 'world');
-    assert_eq($data['json']['num'] ?? null, 42);
+    assert_eq($data['json']['hello'] ?? null, 'world', resp_info($resp));
+    assert_eq($data['json']['num'] ?? null, 42, resp_info($resp));
 });
 
 test('form option sets body and Content-Type', function () {
@@ -367,8 +372,8 @@ test('form option sets body and Content-Type', function () {
         'form' => ['field' => 'value', 'other' => 'data'],
     ]);
     $data = $resp->json();
-    assert_eq($data['form']['field'] ?? null, 'value');
-    assert_eq($data['form']['other'] ?? null, 'data');
+    assert_eq($data['form']['field'] ?? null, 'value', resp_info($resp));
+    assert_eq($data['form']['other'] ?? null, 'data', resp_info($resp));
 });
 
 test('body option sends raw string body', function () {
@@ -377,7 +382,7 @@ test('body option sends raw string body', function () {
         'body'    => 'raw payload here',
     ]);
     $data = $resp->json();
-    assert_eq($data['data'] ?? null, 'raw payload here');
+    assert_eq($data['data'] ?? null, 'raw payload here', resp_info($resp));
 });
 
 test('per-request headers are sent', function () {
