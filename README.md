@@ -19,7 +19,20 @@ Lets you make HTTP requests that look like they came from a real browser at the 
 
 ### Installation
 
-Download the pre-built `.so` for your PHP version from the [Releases](https://github.com/takielias/php-rnet/releases) page, then load it:
+Download the pre-built `.so` for your PHP version from the [Releases](https://github.com/takielias/php-rnet/releases) page, then load it.
+
+Supported PHP versions:
+
+| PHP | Pre-built since | Minimum patch release |
+|---|---|---|
+| 8.2 | v0.0.1 | 8.2.35 |
+| 8.3 | v0.0.1 | 8.3.36 |
+| 8.4 | v0.0.1 | 8.4.27 |
+| 8.5 | v0.0.3 | 8.5.12 |
+
+PHP 8.1 is end of life. The last pre-built 8.1 file is in v0.0.2 and stays available there.
+
+The PHP security releases of 21 October 2026 fix PHP itself, so upgrade your PHP runtime to the minimum patch release above or newer. Replacing the extension file alone does not apply those fixes.
 
 ```bash
 # Check your PHP version
@@ -359,7 +372,7 @@ try {
 ### System requirements
 
 - Linux x86_64
-- PHP 8.1 or newer (with development headers)
+- PHP 8.2 or newer (with development headers)
 - Rust 1.85 or newer
 - cmake 3.14 or newer (to compile BoringSSL)
 - libclang 18 (used at build time only by bindgen — not needed at runtime)
